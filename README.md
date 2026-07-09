@@ -34,7 +34,7 @@ Este proyecto está preparado para correr con un runner self-hosted en EC2.
 
 El workflow se ejecuta cuando haces push a `main` y levanta la aplicación con Docker Compose.
 
-La app queda disponible en:
+La app queda disponible en
 
 ```text
 http://IP_PUBLICA_EC2:8501
