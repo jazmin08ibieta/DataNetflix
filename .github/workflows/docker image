@@ -1,0 +1,46 @@
+name: Deploy Netflix Streamlit Docker
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: [self-hosted, Linux, X64]
+
+    steps:
+      - name: Descargar código del repositorio
+        uses: actions/checkout@v4
+
+      - name: Verificar Docker
+        run: |
+          docker --version
+          docker compose version
+
+      - name: Detener versión anterior
+        run: |
+          docker compose down || true
+
+      - name: Create .env from GitHub Secrets
+        shell: bash
+        run: |
+          set -euo pipefail
+          {
+            echo "AWS_REGION=${{ secrets.AWS_REGION }}";
+            echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}";
+            echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}";
+            echo "S3_BUCKET_NAME=${{ secrets.S3_BUCKET_NAME }}";
+            echo "S3_FILE_KEY=${{ secrets.S3_FILE_KEY }}";
+            echo "S3_OUTPUT_KEY=${{ secrets.S3_OUTPUT_KEY }}";
+          } > .env
+          chmod 600 .env
+
+      - name: Construir y levantar Streamlit
+        run: |
+          docker compose up -d --build
+
+      - name: Revisar contenedor
+        run: |
+          docker ps
